@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Lyrics Generator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8; }
+        body { 
+            background-color: var(--bg); color: var(--text); 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            max-width: 800px; margin: 0 auto; padding: 40px 20px; 
+        }
+        h1 { text-align: center; color: var(--accent); font-size: 2.5rem; }
+        .input-group { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        input { 
+            width: 100%; padding: 14px; background: #334155; border: 1px solid #475569; 
+            border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 15px; box-sizing: border-box;
+        }
+        button { 
+            background: var(--accent); color: #0f172a; font-weight: bold; 
+            border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem;
+            transition: transform 0.1s;
+        }
+        button:active { transform: scale(0.98); }
+        #output { 
+            margin-top: 30px; line-height: 1.8; font-size: 1.1rem;
+            white-space: pre-wrap;
+            background: var(--card); padding: 30px; border-radius: 12px;
+        }
+        .input-group {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: #7dd3fc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .verse-gap { margin-bottom: 2em; }
+    </style>
+</head>
+
+<body>
+
+    <h1>🎵 AI Lyrics Generator</h1>
+    <p style="text-align: center; opacity: 0.8;">Paste a YouTube link below and let the AI transcribe the lyrics for you.</p>
+
+    <div class="input-group">
+        <input type="text" id="songLink" placeholder="https://www.youtube.com/watch?v=...">
+        <button onclick="getLyrics()">Generate Lyrics</button>
+        <button id="copyBtn" onclick="copyLyrics()" style="display:none; margin-top: 10px; background: #475569;">📋 Copy Lyrics</button>
+    </div>
+    
+    <div id="status" style="margin-top: 20px; text-align: center;"></div>
+
+    <div id="loader" style="display: none; text-align: center; margin: 20px;">
+        <div class="spinner"></div>
+        <p>AI is analyzing the audio...</p>
+    </div>
+
+    <div id="output">Lyrics will appear here...</div>
+
+    <div style="margin-top: 40px; font-size: 0.8rem; opacity: 0.5; text-align: center;">
+        <span>Built with:</span>
+        <span style="border: 1px solid #475569; padding: 2px 8px; border-radius: 20px; margin: 0 5px;">FastAPI</span>
+        <span style="border: 1px solid #475569; padding: 2px 8px; border-radius: 20px; margin: 0 5px;">OpenAI Whisper</span>
+        <span style="border: 1px solid #475569; padding: 2px 8px; border-radius: 20px; margin: 0 5px;">Vanilla JS</span>
+    </div>
+
+    <script>
+        async function getLyrics() {
+            const link = document.getElementById('songLink').value;
+            const status = document.getElementById('status');
+            const output = document.getElementById('output');
+            const loader = document.getElementById('loader');
+            const copyBtn = document.getElementById('copyBtn');
+    
+            if (!link) {
+                alert("Please paste a link first!");
+                return;
+            }
+    
+            // Show loading state
+            status.innerText = "⏳ AI is listening... this takes about 1 minute.";
+            output.innerText = "";
+            loader.style.display = 'block';
+            copyBtn.style.display = 'none';
+            
+            try {
+                const response = await fetch(`http://127.0.0.1:8080/generate?url=${encodeURIComponent(link)}`);
+                
+                if (!response.ok) {
+                    throw new Error("Server error. Check your terminal!");
+                }
+    
+                const data = await response.json();
+                
+                // Hide loader when done
+                loader.style.display = 'none';
+
+                if (data && data.lyrics) {
+                    output.innerText = data.lyrics;
+                    status.innerText = "✅ Done!";
+                    copyBtn.style.display = 'block';
+                } else {
+                    status.innerText = "❌ AI finished but found no words.";
+                }
+    
+            } catch (error) {
+                console.error("Connection Error:", error);
+                loader.style.display = 'none';
+                status.innerText = "❌ Error: Could not reach the server.";
+            }
+        }
+
+        function copyLyrics() {
+            const text = document.getElementById('output').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Lyrics copied to clipboard!");
+            });
+        }
+    </script>
+
+</body>
+</html>

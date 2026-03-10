@@ -105,7 +105,10 @@
             copyBtn.style.display = 'none';
             
             try {
-                const response = await fetch(`http://127.0.0.1:8080/generate?url=${encodeURIComponent(link)}`);
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
                 
                 if (!response.ok) {
                     throw new Error("Server error. Check your terminal!");

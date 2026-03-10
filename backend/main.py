@@ -6,7 +6,6 @@ import os
 
 app = FastAPI()
 
-# This allows your website to talk to this Python code
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
@@ -22,7 +21,7 @@ def get_lyrics(url: str):
     # 1. THE DOWNLOADER SETTINGS
     options = {
         'format': 'bestaudio/best',
-        'outtmpl': 'song_to_transcribe', # This saves the file as 'song_to_transcribe.mp3'
+        'outtmpl': 'song_to_transcribe', # saves the file as 'song_to_transcribe.mp3'
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
@@ -38,11 +37,10 @@ def get_lyrics(url: str):
 
     # 3. START THE AI TRANSCRIPTION
     print("AI is now transcribing... please wait.")
-    # We point the AI to the file we just downloaded
+    # Point the AI to downloaded file
     result = model.transcribe("song_to_transcribe.mp3", initial_prompt="These are song lyrics with verse and chorus.")
 
     # 4. CLEAN UP THE TEXT
-    # We take the AI segments and join them with line breaks
     lyrics_with_breaks = ""
     for segment in result['segments']:
         lyrics_with_breaks += segment['text'].strip() + "\n"

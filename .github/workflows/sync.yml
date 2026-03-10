@@ -16,4 +16,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         # REPLACE 'your-username' and 'your-space-name' below!
-        run: git push https://KyanPerera:$HF_TOKEN@huggingface.co/spaces/KyanPerera/ai-lyrics-generator main
+        run: git push -f https://KyanPerera:$HF_TOKEN@huggingface.co/spaces/KyanPerera/ai-lyrics-transcriber main

@@ -1,3 +1,12 @@
+---
+title: AI Lyrics Transcriber
+emoji: 🎵
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # AI Lyrics Generator
 
 A full-stack web application using **OpenAI Whisper AI** to transcribe YouTube audio into lyrics with high accuracy. 

@@ -15,5 +15,4 @@ jobs:
       - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        # REPLACE 'your-username' and 'your-space-name' below!
         run: git push -f https://KyanPerera:$HF_TOKEN@huggingface.co/spaces/KyanPerera/ai-lyrics-transcriber main

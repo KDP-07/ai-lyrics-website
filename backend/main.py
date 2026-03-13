@@ -39,6 +39,7 @@ def get_lyrics(url: str):
             'preferredquality': '320',
         }],
         'keepvideo': False,
+        'source_address': '0.0.0.0'  
     }
 
     # Starts the download

@@ -105,10 +105,8 @@
             copyBtn.style.display = 'none';
             
             try {
-                const response = await fetch('/transcribe', {
-                    method: 'POST',
-                    body: formData
-                });
+                // THE FIX: Pointing exactly to your Python endpoint
+                const response = await fetch(`/generate?url=${encodeURIComponent(link)}`);
                 
                 if (!response.ok) {
                     throw new Error("Server error. Check your terminal!");

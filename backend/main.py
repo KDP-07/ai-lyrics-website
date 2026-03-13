@@ -4,6 +4,16 @@ import yt_dlp
 import whisper
 import os
 
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+import os
+
+# 1. Tell Python where your HTML file is sitting
+# (Assuming index.html is in a folder called 'frontend')
+@app.get("/")
+async def read_index():
+    return FileResponse('frontend/index.html')
+
 app = FastAPI()
 
 app.add_middleware(

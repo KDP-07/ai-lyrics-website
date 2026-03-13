@@ -16,10 +16,18 @@
         }
         h1 { text-align: center; color: var(--accent); font-size: 2.5rem; }
         .input-group { background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        input { 
-            width: 100%; padding: 14px; background: #334155; border: 1px solid #475569; 
+        
+        /* New File Input Styling */
+        input[type="file"] { 
+            width: 100%; padding: 14px; background: #334155; border: 2px dashed #475569; 
             border-radius: 8px; color: white; font-size: 1rem; margin-bottom: 15px; box-sizing: border-box;
+            cursor: pointer;
         }
+        input[type="file"]::file-selector-button {
+            background: #475569; border: none; padding: 8px 16px; border-radius: 4px; color: white; margin-right: 15px; cursor: pointer; transition: background 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover { background: #64748b; }
+
         button { 
             background: var(--accent); color: #0f172a; font-weight: bold; 
             border: none; padding: 14px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1rem;
@@ -61,11 +69,11 @@
 <body>
 
     <h1>🎵 AI Lyrics Generator</h1>
-    <p style="text-align: center; opacity: 0.8;">Paste a YouTube link below and let the AI transcribe the lyrics for you.</p>
+    <p style="text-align: center; opacity: 0.8;">Upload an audio file (.mp3, .wav, .m4a) below and let the AI transcribe it for you.</p>
 
     <div class="input-group">
-        <input type="text" id="songLink" placeholder="https://www.youtube.com/watch?v=...">
-        <button onclick="getLyrics()">Generate Lyrics</button>
+        <input type="file" id="audioFile" accept="audio/*,video/*">
+        <button onclick="getLyrics()">Upload & Generate Lyrics</button>
         <button id="copyBtn" onclick="copyLyrics()" style="display:none; margin-top: 10px; background: #475569;">📋 Copy Lyrics</button>
     </div>
     
@@ -73,7 +81,7 @@
 
     <div id="loader" style="display: none; text-align: center; margin: 20px;">
         <div class="spinner"></div>
-        <p>AI is analyzing the audio...</p>
+        <p>Uploading & Analyzing audio...</p>
     </div>
 
     <div id="output">Lyrics will appear here...</div>
@@ -87,26 +95,33 @@
 
     <script>
         async function getLyrics() {
-            const link = document.getElementById('songLink').value;
+            const fileInput = document.getElementById('audioFile');
             const status = document.getElementById('status');
             const output = document.getElementById('output');
             const loader = document.getElementById('loader');
             const copyBtn = document.getElementById('copyBtn');
     
-            if (!link) {
-                alert("Please paste a link first!");
+            if (fileInput.files.length === 0) {
+                alert("Please select a file first!");
                 return;
             }
     
+            // 1. Package the file to send to the backend securely
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
             // Show loading state
-            status.innerText = "⏳ AI is listening... this takes about 1 minute.";
+            status.innerText = "⏳ Uploading and sending to AI... this takes about 1 minute.";
             output.innerText = "";
             loader.style.display = 'block';
             copyBtn.style.display = 'none';
             
             try {
-                // THE FIX: Pointing exactly to your Python endpoint
-                const response = await fetch(`/generate?url=${encodeURIComponent(link)}`);
+                // 2. Send the POST request to the Python backend
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
                 
                 if (!response.ok) {
                     throw new Error("Server error. Check your terminal!");

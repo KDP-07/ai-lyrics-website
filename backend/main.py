@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-import yt_dlp
 import whisper
 import os
 
@@ -26,36 +25,27 @@ async def read_index():
 print("Loading AI Model...")
 model = whisper.load_model("small")
 
-# The AI endpoint
-@app.get("/generate")
-def get_lyrics(url: str):
-    # Downloader settings
-    options = {
-        'format': 'bestaudio/best',
-        'outtmpl': 'song_to_transcribe', # saves the file as 'song_to_transcribe.mp3'
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '320',
-        }],
-        'keepvideo': False,
-        'source_address': '0.0.0.0'  
-    }
+# The AI endpoint (Now accepts POST requests with Files)
+@app.post("/generate")
+async def get_lyrics(file: UploadFile = File(...)):
+    print(f"Receiving file: {file.filename}")
+    
+    # 1. Save the uploaded file temporarily
+    temp_file_path = f"temp_{file.filename}"
+    with open(temp_file_path, "wb") as buffer:
+        buffer.write(await file.read())
 
-    # Starts the download
-    print(f"Downloading from: {url}")
-    with yt_dlp.YoutubeDL(options) as ydl:
-        ydl.download([url])
-
-    # Starts the AI transcription
+    # 2. Run the AI transcription
     print("AI is now transcribing... please wait.")
-    result = model.transcribe("song_to_transcribe.mp3", initial_prompt="These are song lyrics with verse and chorus.")
+    result = model.transcribe(temp_file_path, initial_prompt="These are song lyrics with verse and chorus.")
 
-    # Cleans up the text
+    # 3. Clean up the text formatting
     lyrics_with_breaks = ""
     for segment in result['segments']:
         lyrics_with_breaks += segment['text'].strip() + "\n"
 
-    # Sends it back to the website
+    # 4. Delete the audio file so the server doesn't get full
+    os.remove(temp_file_path)
+
     print("Done! Sending lyrics to the website.")
     return {"lyrics": lyrics_with_breaks}

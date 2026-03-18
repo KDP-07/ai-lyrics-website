@@ -18,8 +18,8 @@ app.add_middleware(
 # HTML file location
 @app.get("/")
 async def read_index():
-    # Make sure this matches exactly where your index.html lives!
-    return FileResponse('frontend/index.html')
+    # removed 'frontend/' because it's no longer in a folder
+    return FileResponse('index.html')
 
 # load the AI model
 print("Loading AI Model...")

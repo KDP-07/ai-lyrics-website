@@ -4,3 +4,4 @@ WORKDIR /code
 COPY . .
 RUN pip install fastapi uvicorn openai-whisper python-multipart
 # Hugging Face MUST use port 7860
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]

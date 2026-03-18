@@ -23,7 +23,7 @@ async def read_index():
 
 # load the AI model
 print("Loading AI Model...")
-model = whisper.load_model("small")
+model = whisper.load_model("medium")
 
 # The AI endpoint (Now accepts POST requests with Files)
 @app.post("/generate")
